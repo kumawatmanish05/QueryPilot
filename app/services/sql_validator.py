@@ -1,22 +1,27 @@
-import re 
+import sqlglot
+from sqlglot import exp
+from sqlglot.errors import ParseError
 
-def validate_read_only_sql(sql : str) -> tuple[bool ,str]:
-    """Perform basic checks on a read -only SQL Query."""
+def validate_read_only_sql(sql : str) -> tuple[bool,str]:
+    """Perform basic structral checks on a read -only SQL query."""
 
     if not sql or not sql.strip():
         return False,"SQL query cannot be empty."
 
-    normalized_sql = sql.strip()
+    try:
+        statements = sqlglot.parse(sql , read = "sqlite")
+    except ParseError:
+        return False ,"Invalid SQL Syntax."
 
-    #Allow at most one trailing semicolon.
-    normalized_sql = normalized_sql.rstrip(";").strip()
+    #Ingnore empty statements , such as extra trailing semicolons.
+    statements = [statement for statement in statements if statement is not None]
 
-    #Reject multiple SQL Statements
-    if ";" in normalized_sql:
-        return False , "Multiple SQL Statements are not allowed."
+    if len(statements) !=1:
+        return False , "Exactly one SQL statement is required"
 
-    # Only Allow SELECT queries at this Stage.
-    if not re.match(r"^SELECT\b",normalized_sql,re.IGNORECASE):
-        return False ,"ONLy SELECT queries are allowed."
+    statement = statements[0]
 
-    return True , "Query Passed basic Validation"
+    if not isinstance(statement , exp.Select):
+        return False ,"Only SELECT queries are allowed"
+
+    return True ,"Query passed Structural Validation."
