@@ -11,7 +11,9 @@ from app.core.database import engine
 DATA_PATH = Path("data/sample_sales.csv")
 
 
-def load_csv_to_table(csv_path: str, table_name: str) -> int:
+def load_csv_to_table(csv_path: str, 
+                      table_name: str , 
+                      database_engine=None) -> int:
     csv_file = Path(csv_path)
 
     if not csv_file.exists():
@@ -25,7 +27,10 @@ def load_csv_to_table(csv_path: str, table_name: str) -> int:
     if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", table_name):
         raise ValueError("Invalid Table name.")
 
-    with engine.begin() as connection:
+    if database_engine is None:
+        database_engine = engine
+
+    with database_engine.begin() as connection:
         df.to_sql(
             name=table_name,
             con=connection,
