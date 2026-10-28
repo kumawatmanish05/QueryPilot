@@ -16,6 +16,7 @@ class QueryExecutionTimeoutError(TimeoutError):
 def execute_read_only_query(
     sql: str,
     max_rows: int = DEFAULT_MAX_ROWS,
+    database_engine=None,
 ) -> list[dict]:
     """Validate and execute SQL through a read-only SQLite connection."""
 
@@ -26,17 +27,17 @@ def execute_read_only_query(
         raise ValueError(
             f"max_rows must be between 1 and {ABSOLUTE_MAX_ROWS}."
         )
+    if database_engine is None:
+        database_engine = engine
 
     is_valid, message = validate_read_only_sql(sql)
     if not is_valid:
         raise ValueError(message)
 
-    if engine.dialect.name != "sqlite":
-        raise RuntimeError(
-            "Read-only connection setup currently supports SQLite only."
-        )
+    if database_engine.dialect.name != "sqlite":
+        raise NotImplementedError("Only SQLite is currently supported.")
 
-    database_path = engine.url.database
+    database_path = database_engine.url.database
     if not database_path:
         raise RuntimeError("SQLite database path is not configured.")
 
