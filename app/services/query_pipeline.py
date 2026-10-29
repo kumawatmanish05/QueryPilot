@@ -15,12 +15,7 @@ def run_query(question:str, database_engine: Engine) -> dict:
         schema_context=schema_context,
     )
 
-    print("RAW GENERATED SQL:", repr(sql))
-
     is_valid, message = validate_read_only_sql(sql)
-
-    print("VALIDATION RESULT:", is_valid)
-    print("VALIDATION MESSAGE:", message)
 
     if not is_valid:
         raise ValueError(f"Generated SQL was rejected: {message}")
