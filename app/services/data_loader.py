@@ -24,6 +24,12 @@ def load_csv_to_table(csv_path: str,
     if df.empty:
         raise ValueError("Dataset is empty.")
 
+    if len(df.columns) == 0:
+        raise ValueError("Dataset has no columns.")
+
+    if not df.columns.is_unique:
+        raise ValueError("Dataset contains duplicate columns names.")
+
     if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", table_name):
         raise ValueError("Invalid Table name.")
 
