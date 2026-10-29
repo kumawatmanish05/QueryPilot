@@ -15,6 +15,11 @@ def run_query(question:str, database_engine: Engine) -> dict:
         schema_context=schema_context,
     )
 
+    if sql.strip().upper() == "CANNOT_ANSWER":
+        raise ValueError(
+            "This question cannot be answered using the available dataset."
+        )
+
     is_valid, message = validate_read_only_sql(sql)
 
     if not is_valid:
