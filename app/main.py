@@ -1,5 +1,9 @@
 import re
 from pathlib import Path
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from fastapi import HTTPException
 from fastapi import FastAPI
@@ -49,6 +53,13 @@ def query_database(request: QueryRequest):
             status_code=400,
             detail=str(exc),
         ) from exc
+
+    except Exception:
+        logger.exception("Unexpected error while processing QueryPilot Result")
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred while processing your query.",
+        ) from None
     
     finally:
         database_engine.dispose()
