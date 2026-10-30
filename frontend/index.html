@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueryPilot | Analytics Workspace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">QueryPilot<span>.</span></div>
+        <div class="status">
+            <span class="status-dot"></span>
+            AI Analytics Workspace
+        </div>
+    </header>
+
+    <main class="workspace">
+
+        <section class="left-panel">
+
+            <div class="welcome">
+                <h1>Explore your data.</h1>
+                <p>Upload a dataset and ask questions in plain English.</p>
+            </div>
+
+            
+<div class="panel-card upload-card">
+    <h2>01. Your dataset</h2>
+    <p class="description">Upload a CSV file to get started.</p>
+
+    <label for="fileInput" class="upload-zone">
+        <span class="upload-icon">↑</span>
+        <strong>Choose a CSV file</strong>
+        <span>Click to browse your files</span>
+        <small>CSV files only · Maximum 5 MB</small>
+    </label>
+
+    <input type="file" id="fileInput" accept=".csv" hidden>
+
+    <div id="fileInfo" class="dataset-preview" hidden>
+        <div class="file-icon">CSV</div>
+
+        <div class="file-details">
+            <strong id="fileName">sample_sales.csv</strong>
+            <span id="fileMeta">Waiting for upload...</span>
+        </div>
+
+        <span id="fileStatus" class="file-status">Ready</span>
+    </div>
+
+    <button id="uploadBtn" class="primary-btn">
+        Upload dataset
+    </button>
+
+    <p id="uploadStatus" class="status-message"></p>
+</div>
+
+
+            <div class="panel-card question-card">
+                <h2>02. Ask a question</h2>
+                <p class="description">
+                    What would you like to know about your data?
+                </p>
+
+                <textarea
+                    id="questionInput"
+                    placeholder="Example: Show total revenue by product..."
+                ></textarea>
+
+                <button id="queryBtn" class="primary-btn">
+                    Generate insights →
+                </button>
+            </div>
+
+        </section>
+
+        <section class="right-panel">
+
+            <div class="results-header">
+                <div>
+                    <h2>Analytics results</h2>
+                    <p class="description">
+                        Your generated SQL and query output.
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel-card sql-card">
+                <div class="card-heading">
+                    <h3>Generated SQL</h3>
+                    <span class="tag">SQL</span>
+                </div>
+
+                <pre id="sqlOutput">Your SQL query will appear here.</pre>
+            </div>
+
+            <div class="panel-card output-card">
+                <div class="card-heading">
+                    <h3>Query results</h3>
+                    <span class="tag">OUTPUT</span>
+                </div>
+
+                <div id="resultsOutput">
+                    <div class="empty-state">
+                        <p>Your results will appear here.</p>
+                        <span>Upload a dataset and ask your first question.</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+

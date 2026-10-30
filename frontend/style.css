@@ -1,0 +1,618 @@
+
+/* =====================================
+   QueryPilot — Clean Navy SaaS Theme
+===================================== */
+
+:root {
+    --background: #edf1f8;
+    --surface: #ffffff;
+    --navy: #172554;
+    --navy-light: #263b75;
+    --text: #172033;
+    --muted: #778195;
+    --border: #dce3ef;
+    --soft-navy: #e9eef8;
+    --success: #16845b;
+    --danger: #c43d4b;
+}
+
+/* Reset */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    background: var(--background);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* =====================================
+   Navbar
+===================================== */
+
+.navbar {
+    height: 65px;
+    padding: 0 5%;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-size: 23px;
+    font-weight: 750;
+    letter-spacing: -1px;
+    color: #ffffff;
+}
+
+.logo span {
+    color: #aab9dc;
+}
+
+.status {
+    font-size: 12px;
+    color: #d5dced;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+}
+
+/* =====================================
+   Main Workspace
+===================================== */
+
+.workspace {
+    width: 94%;
+    max-width: 1500px;
+    height: calc(100vh - 65px);
+    min-height: 550px;
+    margin: auto;
+    padding: 25px 0;
+
+    display: grid;
+    grid-template-columns: 0.85fr 1.4fr;
+    gap: 24px;
+}
+
+.left-panel,
+.right-panel {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+}
+
+/* =====================================
+   Welcome Section
+===================================== */
+
+.welcome {
+    padding: 5px 2px 8px;
+}
+
+.welcome h1 {
+    font-size: 29px;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    color: var(--navy);
+}
+
+.welcome p,
+.description {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* =====================================
+   Cards
+===================================== */
+
+.panel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 21px;
+    min-width: 0;
+
+    box-shadow: 0 3px 12px rgba(23, 37, 84, 0.04);
+}
+
+.panel-card h2 {
+    font-size: 15px;
+    margin-bottom: 5px;
+    color: var(--navy);
+}
+
+.panel-card h3 {
+    font-size: 14px;
+    color: var(--navy);
+}
+
+/* Upload card */
+
+.left-panel .panel-card:first-of-type {
+    border-top: 3px solid var(--navy);
+}
+
+/* Question card */
+
+.question-card {
+    border-top: 3px solid var(--navy);
+}
+
+/* =====================================
+   File Upload
+===================================== */
+
+input[type="file"] {
+    display: block;
+    width: 100%;
+    margin: 16px 0;
+    padding: 11px;
+
+    border: 1px dashed #aebbd3;
+    border-radius: 7px;
+
+    background: var(--soft-navy);
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* =====================================
+   Question Input
+===================================== */
+
+textarea {
+    display: block;
+    width: 100%;
+    height: 110px;
+    margin: 14px 0;
+    padding: 13px;
+
+    border: 1px solid var(--border);
+    border-radius: 7px;
+
+    background: #fafbfe;
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+
+    resize: vertical;
+    transition: 0.2s;
+}
+
+textarea::placeholder {
+    color: #9aa3b2;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(23, 37, 84, 0.08);
+}
+
+/* =====================================
+   Buttons
+===================================== */
+
+.primary-btn {
+    width: 100%;
+    padding: 12px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: var(--navy);
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.primary-btn:hover {
+    background: var(--navy-light);
+    transform: translateY(-1px);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+}
+
+.primary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* =====================================
+   Upload Status
+===================================== */
+
+.status-message {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--success);
+}
+
+/* =====================================
+   Results Header
+===================================== */
+
+.results-header {
+    padding: 5px 2px 8px;
+}
+
+.results-header h2 {
+    font-size: 21px;
+    margin-bottom: 5px;
+    color: var(--navy);
+}
+
+/* =====================================
+   SQL Section
+===================================== */
+
+.sql-card {
+    flex: 0 0 auto;
+    background: #f4f6fb;
+    border-color: #dce3ef;
+}
+
+pre {
+    background: var(--navy);
+    border: 1px solid #263b75;
+    border-radius: 7px;
+
+    padding: 16px;
+    min-height: 90px;
+    max-height: 155px;
+
+    overflow: auto;
+
+    color: #e2e8f0;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.7;
+
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* =====================================
+   Section Labels
+===================================== */
+
+.card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.tag {
+    padding: 5px 9px;
+    background: var(--soft-navy);
+    color: var(--navy);
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* =====================================
+   Query Results
+===================================== */
+
+.output-card {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    background: var(--surface);
+}
+
+#resultsOutput {
+    color: var(--muted);
+    font-size: 13px;
+    overflow-x: auto;
+}
+
+.empty-state {
+    min-height: 180px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    gap: 8px;
+
+    color: var(--muted);
+    background: #f7f9fc;
+
+    border: 1px dashed #d9e0ec;
+    border-radius: 9px;
+}
+
+.empty-state span {
+    font-size: 12px;
+}
+
+/* =====================================
+   Responsive Design
+===================================== */
+
+@media (max-width: 800px) {
+
+    .workspace {
+        height: auto;
+        min-height: 0;
+        grid-template-columns: 1fr;
+        padding: 22px 0;
+    }
+
+    .output-card {
+        min-height: 250px;
+    }
+}
+
+@media (max-height: 700px) and (min-width: 801px) {
+
+    .workspace {
+        padding: 15px 0;
+        gap: 12px;
+    }
+
+    .left-panel,
+    .right-panel {
+        gap: 10px;
+    }
+
+    .panel-card {
+        padding: 15px;
+    }
+
+    textarea {
+        height: 75px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .navbar {
+        padding: 0 18px;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .status {
+        font-size: 10px;
+    }
+
+    .welcome h1 {
+        font-size: 25px;
+    }
+
+    .panel-card {
+        padding: 17px;
+    }
+}
+
+.file-info {
+    margin: 12px 0;
+    padding: 11px 13px;
+    border-radius: 7px;
+    background: #e9eef8;
+    color: #172554;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+
+/* Dataset upload zone */
+
+.upload-zone {
+    min-height: 145px;
+    margin: 18px 0;
+    padding: 20px;
+    border: 1px dashed #aebbd3;
+    border-radius: 10px;
+    background: #f5f7fb;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.upload-zone:hover {
+    background: #e9eef8;
+    border-color: #172554;
+}
+
+.upload-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 9px;
+    background: #172554;
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+}
+
+.upload-zone strong {
+    font-size: 13px;
+    color: #172554;
+}
+
+.upload-zone span:not(.upload-icon) {
+    font-size: 12px;
+    color: #778195;
+}
+
+.upload-zone small {
+    font-size: 10px;
+    color: #9aa3b2;
+}
+
+/* Uploaded dataset preview */
+
+.dataset-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px;
+    margin: 14px 0;
+    background: #f1f4fa;
+    border: 1px solid #dce3ef;
+    border-radius: 9px;
+}
+
+.dataset-preview[hidden] {
+    display: none;
+}
+
+.file-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: #172554;
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.file-details {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.file-details strong {
+    font-size: 12px;
+    color: #172554;
+    overflow-wrap: anywhere;
+}
+
+.file-details span {
+    font-size: 11px;
+    color: #778195;
+}
+
+.file-status {
+    font-size: 10px;
+    font-weight: 700;
+    color: #16845b;
+    background: #e2f4eb;
+    padding: 5px 8px;
+    border-radius: 20px;
+}
+
+/* =====================================
+   Compact Desktop Workspace
+===================================== */
+
+@media (min-width: 801px) {
+
+    .workspace {
+        height: calc(100vh - 65px);
+        min-height: 0;
+        padding: 16px 0;
+        gap: 18px;
+        overflow: hidden;
+    }
+
+    .left-panel,
+    .right-panel {
+        gap: 12px;
+        min-height: 0;
+    }
+
+    .welcome {
+        padding: 0 2px 3px;
+    }
+
+    .welcome h1 {
+        font-size: 25px;
+        margin-bottom: 5px;
+    }
+
+    .panel-card {
+        padding: 15px;
+    }
+
+    .upload-zone {
+        min-height: 105px;
+        margin: 12px 0;
+        padding: 12px;
+    }
+
+    .upload-icon {
+        width: 29px;
+        height: 29px;
+        font-size: 18px;
+    }
+
+    .dataset-preview {
+        margin: 9px 0;
+        padding: 9px;
+    }
+
+    textarea {
+        height: 75px;
+        margin: 10px 0;
+    }
+
+    .results-header {
+        padding: 0 2px 3px;
+    }
+
+    .sql-card {
+        padding: 14px;
+    }
+
+    pre {
+        min-height: 65px;
+        max-height: 115px;
+        padding: 12px;
+    }
+
+    .output-card {
+        min-height: 0;
+        overflow: auto;
+    }
+}
+
+
+
