@@ -35,13 +35,23 @@ def generate_sql(question: str, schema_context: str) -> str:
             }
         ],
         temperature=0,
-        max_completion_tokens=300,
+        max_completion_tokens=600,
     )
 
-    sql = response.choices[0].message.content
+    if not response.choices:
+        raise RuntimeError("The language model returned no choices.")
 
-    if not sql:
-        raise RuntimeError("The language model returned an empty response.")
+    choice = response.choices[0]
+    message = choice.message
+    sql = message.content
+
+    # Log response metadata when the model returns no text.
+    if not sql or not sql.strip():
+        raise RuntimeError(
+            "The language model returned an empty response. "
+            f"Finish reason: {choice.finish_reason}. "
+            f"Refusal: {getattr(message, 'refusal', None)}"
+        )
 
     return sql.strip()
 
