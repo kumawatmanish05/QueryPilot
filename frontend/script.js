@@ -1,5 +1,4 @@
 
-
 // ============================================
 // QueryPilot - Frontend JavaScript
 // ============================================
@@ -29,51 +28,45 @@ const sqlOutput = document.getElementById("sqlOutput");
 const resultsOutput = document.getElementById("resultsOutput");
 
 
-// Check that required HTML elements exist
-
-const requiredElements = {
-    fileInput,
-    uploadBtn,
-    uploadStatus,
-    fileInfo,
-    fileName,
-    fileMeta,
-    fileStatus,
-    queryBtn,
-    questionInput,
-    sqlOutput,
-    resultsOutput
-};
-
-for (const [name, element] of Object.entries(requiredElements)) {
-    if (!element) {
-        console.error(`Missing HTML element: ${name}`);
-    }
-}
-
-
 // ============================================
 // Application State
 // ============================================
 
-let currentDatasetId =
-    sessionStorage.getItem("querypilot_dataset_id");
+let currentDatasetId = sessionStorage.getItem(
+    "querypilot_dataset_id"
+);
 
-const savedFileName =
-    sessionStorage.getItem("querypilot_file_name");
+const savedFileName = sessionStorage.getItem(
+    "querypilot_file_name"
+);
 
-const savedRowCount =
-    sessionStorage.getItem("querypilot_row_count");
+const savedRowCount = sessionStorage.getItem(
+    "querypilot_row_count"
+);
 
-// Restore previously uploaded dataset
+
+// ============================================
+// Restore Previous Dataset
+// ============================================
+
 if (currentDatasetId && savedFileName) {
+
     fileInfo.hidden = false;
 
     fileName.textContent = savedFileName;
-    fileMeta.textContent = `${savedRowCount} rows loaded`;
+
+    fileMeta.textContent =
+        `${savedRowCount || 0} rows loaded`;
+
     fileStatus.textContent = "Uploaded";
 
-    uploadStatus.textContent = "Dataset ready for analysis.";
+    uploadStatus.textContent =
+        "Dataset ready for analysis.";
+
+    resultsOutput.textContent =
+        "Ask a question to explore your dataset.";
+
+    console.log("Restored dataset:", currentDatasetId);
 }
 
 
@@ -82,28 +75,58 @@ if (currentDatasetId && savedFileName) {
 // ============================================
 
 async function readApiResponse(response) {
-    const text = await response.text();
+
+    const responseText = await response.text();
+
+    console.log("API Status:", response.status);
+    console.log("Raw API Response:", responseText);
 
     let data;
 
     try {
-        data = JSON.parse(text);
+
+        data = JSON.parse(responseText);
+
     } catch {
+
         throw new Error(
-            `Server returned an invalid response (${response.status}).`
+            `Invalid server response (${response.status}).`
         );
+
     }
 
     if (!response.ok) {
-        const message =
-            typeof data.detail === "string"
-                ? data.detail
-                : "Request failed.";
 
-        throw new Error(message);
+        throw new Error(
+            data?.detail || "Request failed."
+        );
+
+    }
+
+    if (!data || typeof data !== "object") {
+
+        throw new Error(
+            "Backend returned an empty or invalid response."
+        );
+
     }
 
     return data;
+}
+
+
+// ============================================
+// Clear Saved Dataset
+// ============================================
+
+function clearSavedDataset() {
+
+    currentDatasetId = null;
+
+    sessionStorage.removeItem("querypilot_dataset_id");
+    sessionStorage.removeItem("querypilot_file_name");
+    sessionStorage.removeItem("querypilot_row_count");
+
 }
 
 
@@ -119,48 +142,59 @@ fileInput.addEventListener("change", () => {
 
     console.log("Selected file:", file.name);
 
+
     // Validate CSV extension
+
     if (!file.name.toLowerCase().endsWith(".csv")) {
 
-        uploadStatus.textContent = "Please select a CSV file.";
+        uploadStatus.textContent =
+            "Please select a CSV file.";
 
         fileInput.value = "";
-        fileInfo.hidden = true;
 
         return;
     }
 
+
     // Validate file size (5 MB)
+
     if (file.size > 5 * 1024 * 1024) {
 
         uploadStatus.textContent =
             "File size exceeds the 5 MB limit.";
 
         fileInput.value = "";
-        fileInfo.hidden = true;
 
         return;
     }
 
-    // A newly selected file needs a new upload
-    currentDatasetId = null;
-    sessionStorage.removeItem("querypilot_dataset_id");
-    sessionStorage.removeItem("querypilot_file_name");
-    sessionStorage.removeItem("querypilot_row_count");
+
+    // New file requires a new upload
+
+    clearSavedDataset();
+
+
+    // Keep selected file visible
 
     fileInfo.hidden = false;
 
     fileName.textContent = file.name;
+
     fileMeta.textContent = "Ready to upload";
+
     fileStatus.textContent = "Selected";
 
     uploadStatus.textContent = "";
+
+
+    // Reset previous results
 
     resultsOutput.textContent =
         "Upload your selected dataset to start analyzing.";
 
     sqlOutput.textContent =
         "Your SQL query will appear here.";
+
 });
 
 
@@ -174,7 +208,9 @@ uploadBtn.addEventListener("click", async () => {
 
     const file = fileInput.files[0];
 
+
     // Check file selection
+
     if (!file) {
 
         uploadStatus.textContent =
@@ -183,23 +219,32 @@ uploadBtn.addEventListener("click", async () => {
         return;
     }
 
+
+    // Prepare upload data
+
     const formData = new FormData();
 
     formData.append("file", file);
 
+
     try {
 
         uploadBtn.disabled = true;
+
         uploadBtn.textContent = "Uploading...";
 
         fileInfo.hidden = false;
 
         fileStatus.textContent = "Uploading";
+
         fileMeta.textContent = "Processing dataset...";
 
-        uploadStatus.textContent = "Uploading your dataset...";
+        uploadStatus.textContent =
+            "Uploading your dataset...";
+
 
         console.log("Sending upload request...");
+
 
         const response = await fetch(
             `${API_BASE_URL}/datasets/upload`,
@@ -209,16 +254,24 @@ uploadBtn.addEventListener("click", async () => {
             }
         );
 
+
         const data = await readApiResponse(response);
 
         console.log("Upload response:", data);
 
-        // Store uploaded dataset ID
+
+        // Validate backend response
+
         if (!data.dataset_id) {
+
             throw new Error(
-                "Upload succeeded but no dataset ID was returned."
+                "Upload response does not contain a dataset ID."
             );
+
         }
+
+
+        // Save dataset ID
 
         currentDatasetId = data.dataset_id;
 
@@ -234,10 +287,12 @@ uploadBtn.addEventListener("click", async () => {
 
         sessionStorage.setItem(
             "querypilot_row_count",
-            data.rows_loaded
+            String(data.rows_loaded)
         );
 
-        // Keep uploaded file visible
+
+        // Update dataset preview
+
         fileInfo.hidden = false;
 
         fileName.textContent = file.name;
@@ -250,32 +305,55 @@ uploadBtn.addEventListener("click", async () => {
         uploadStatus.textContent =
             "Dataset ready for analysis.";
 
-        // Reset SQL and results panels
+
+        // Reset SQL and results
+
         sqlOutput.textContent =
             "Your SQL query will appear here.";
 
         resultsOutput.textContent =
             "Ask a question to explore your dataset.";
 
-        console.log("Dataset ID:", currentDatasetId);
+
+        console.log(
+            "Dataset uploaded successfully:",
+            currentDatasetId
+        );
 
     } catch (error) {
 
         console.error("Upload failed:", error);
 
+
+        // Do not remove the selected file preview
+
         currentDatasetId = null;
 
-        fileStatus.textContent = "Failed";
-        fileMeta.textContent = "Upload unsuccessful";
+        fileInfo.hidden = false;
 
-        uploadStatus.textContent = error.message;
+        fileStatus.textContent = "Failed";
+
+        fileMeta.textContent =
+            "Selected file — upload unsuccessful";
+
+        uploadStatus.textContent =
+            error.message;
+
+
+        // Prevent queries against an unsuccessful upload
+
+        console.warn(
+            "Dataset was not uploaded successfully."
+        );
 
     } finally {
 
         uploadBtn.disabled = false;
+
         uploadBtn.textContent = "Upload dataset";
 
     }
+
 });
 
 
@@ -289,7 +367,9 @@ queryBtn.addEventListener("click", async () => {
 
     const question = questionInput.value.trim();
 
+
     // Check uploaded dataset
+
     if (!currentDatasetId) {
 
         resultsOutput.textContent =
@@ -300,7 +380,9 @@ queryBtn.addEventListener("click", async () => {
         return;
     }
 
+
     // Check question
+
     if (!question) {
 
         resultsOutput.textContent =
@@ -309,18 +391,28 @@ queryBtn.addEventListener("click", async () => {
         return;
     }
 
+
     try {
 
         queryBtn.disabled = true;
-        queryBtn.textContent = "Generating insights...";
 
-        sqlOutput.textContent = "Generating SQL...";
+        queryBtn.textContent =
+            "Generating insights...";
+
+        sqlOutput.textContent =
+            "Generating SQL...";
 
         resultsOutput.textContent =
             "Analyzing your dataset...";
 
+
         console.log("Sending query:", question);
-        console.log("Using dataset:", currentDatasetId);
+
+        console.log(
+            "Using dataset:",
+            currentDatasetId
+        );
+
 
         const response = await fetch(
             `${API_BASE_URL}/query`,
@@ -338,16 +430,22 @@ queryBtn.addEventListener("click", async () => {
             }
         );
 
+
         const data = await readApiResponse(response);
 
         console.log("Query response:", data);
 
+
         // Display generated SQL
+
         sqlOutput.textContent =
             data.sql || "No SQL was generated.";
 
+
         // Display query results
+
         displayResults(data.rows);
+
 
     } catch (error) {
 
@@ -362,7 +460,9 @@ queryBtn.addEventListener("click", async () => {
     } finally {
 
         queryBtn.disabled = false;
-        queryBtn.textContent = "Generate insights →";
+
+        queryBtn.textContent =
+            "Generate insights →";
 
     }
 
@@ -374,68 +474,118 @@ queryBtn.addEventListener("click", async () => {
 // ============================================
 
 function displayResults(rows) {
+
     resultsOutput.innerHTML = "";
 
-    if (!rows || rows.length === 0) {
-        resultsOutput.textContent = "No results found.";
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+
+        resultsOutput.textContent =
+            "No results found.";
+
         return;
     }
 
+
     const columns = Object.keys(rows[0]);
 
+
+    // Create wrapper
+
     const wrapper = document.createElement("div");
+
     wrapper.className = "results-wrapper";
 
+
+    // Create table
+
     const table = document.createElement("table");
+
     table.className = "results-table";
 
-    // Create table header
+
+    // ========================================
+    // Table Header
+    // ========================================
+
     const thead = document.createElement("thead");
+
     const headerRow = document.createElement("tr");
 
+
     columns.forEach(column => {
+
         const th = document.createElement("th");
+
         th.textContent = column.replaceAll("_", " ");
+
         headerRow.appendChild(th);
+
     });
+
 
     thead.appendChild(headerRow);
+
     table.appendChild(thead);
 
-    // Create table body
+
+    // ========================================
+    // Table Body
+    // ========================================
+
     const tbody = document.createElement("tbody");
 
+
     rows.forEach(row => {
+
         const tr = document.createElement("tr");
 
+
         columns.forEach(column => {
+
             const td = document.createElement("td");
+
             const value = row[column];
 
-            td.textContent =
-                typeof value === "number"
-                    ? Number.isInteger(value)
-                        ? value.toLocaleString("en-IN")
-                        : value.toLocaleString("en-IN", {
-                            maximumFractionDigits: 2
-                        })
-                    : value ?? "-";
 
             if (typeof value === "number") {
+
+                td.textContent = Number.isInteger(value)
+                    ? value.toLocaleString("en-IN")
+                    : value.toLocaleString("en-IN", {
+                        maximumFractionDigits: 2
+                    });
+
                 td.classList.add("numeric");
+
+            } else {
+
+                td.textContent = value ?? "-";
+
             }
 
+
             tr.appendChild(td);
+
         });
 
+
         tbody.appendChild(tr);
+
     });
 
+
     table.appendChild(tbody);
+
     wrapper.appendChild(table);
+
     resultsOutput.appendChild(wrapper);
+
 }
+
 
 // ============================================
 // End of QueryPilot Frontend
 // ============================================
+
+

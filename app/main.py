@@ -5,7 +5,8 @@ import uuid
 import pandas as pd
 import csv
 import io
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine , text 
+import json 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -44,8 +45,11 @@ class QueryRequest(BaseModel):
     dataset_id: str = Field(min_length=1, max_length=100)
 
 
+
 @app.post("/query")
 def query_database(request: QueryRequest):
+
+    # Validate dataset ID
     if not re.fullmatch(r"[A-Za-z0-9_-]+", request.dataset_id):
         raise HTTPException(
             status_code=400,
@@ -63,6 +67,7 @@ def query_database(request: QueryRequest):
     database_engine = get_dataset_engine(request.dataset_id)
 
     try:
+        # Validate uploaded dataset
         is_valid, message = validate_dataset(database_engine)
 
         if not is_valid:
@@ -70,12 +75,48 @@ def query_database(request: QueryRequest):
                 status_code=400,
                 detail=message,
             )
-        
+
+        # Generate SQL and execute query
         result = run_query(
             question=request.question,
             database_engine=database_engine,
         )
+
+        # Save query history separately.
+        # History failure must not prevent query results from being returned.
+        try:
+            with database_engine.begin() as connection:
+                connection.execute(
+                    text("""
+                        INSERT INTO query_history (
+                            question,
+                            generated_sql,
+                            results_json,
+                            row_count
+                        )
+                        VALUES (
+                            :question,
+                            :generated_sql,
+                            :results_json,
+                            :row_count
+                        )
+                    """),
+                    {
+                        "question": request.question,
+                        "generated_sql": result["sql"],
+                        "results_json": json.dumps(result["rows"]),
+                        "row_count": result["row_count"],
+                    },
+                )
+
+        except Exception:
+            logger.exception("Failed to save query history")
+
+        # Return query results
         return result
+
+    except HTTPException:
+        raise
 
     except ValueError as exc:
         raise HTTPException(
@@ -84,12 +125,15 @@ def query_database(request: QueryRequest):
         ) from exc
 
     except Exception:
-        logger.exception("Unexpected error while processing QueryPilot Result")
+        logger.exception(
+            "Unexpected error while processing QueryPilot query"
+        )
+
         raise HTTPException(
             status_code=500,
             detail="An unexpected error occurred while processing your query.",
         ) from None
-    
+
     finally:
         database_engine.dispose()
 
@@ -97,14 +141,18 @@ def query_database(request: QueryRequest):
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
 
 
+
 @app.post("/datasets/upload", status_code=201)
 async def upload_dataset(file: UploadFile = File(...)):
+
+    # Validate file extension
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(
             status_code=400,
             detail="Please upload a CSV file.",
         )
 
+    # Read uploaded file
     content = await file.read(MAX_UPLOAD_BYTES + 1)
 
     if len(content) > MAX_UPLOAD_BYTES:
@@ -115,14 +163,17 @@ async def upload_dataset(file: UploadFile = File(...)):
 
     try:
         df = pd.read_csv(io.BytesIO(content))
+
     except (pd.errors.ParserError, UnicodeDecodeError, ValueError):
         raise HTTPException(
             status_code=400,
             detail="The uploaded file is not a valid CSV.",
         ) from None
+
     finally:
         await file.close()
 
+    # Validate dataset
     if df.empty:
         raise HTTPException(
             status_code=400,
@@ -135,7 +186,9 @@ async def upload_dataset(file: UploadFile = File(...)):
             detail="The CSV must have unique column names.",
         )
 
+    # Generate unique dataset ID
     dataset_id = uuid.uuid4().hex
+
     dataset_path = Path("data/datasets") / f"{dataset_id}.db"
     dataset_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -145,28 +198,51 @@ async def upload_dataset(file: UploadFile = File(...)):
 
     try:
         with database_engine.begin() as connection:
+
+            # Store uploaded CSV data
             df.to_sql(
                 name="uploaded_data",
                 con=connection,
                 if_exists="fail",
                 index=False,
             )
+
+            # Create query history table
+            connection.exec_driver_sql("""
+                CREATE TABLE query_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    question TEXT NOT NULL,
+                    generated_sql TEXT NOT NULL,
+                    results_json TEXT NOT NULL,
+                    row_count INTEGER NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
     except Exception:
-        dataset_path.unlink(missing_ok=True)
         logger.exception("Failed to store uploaded dataset")
+
+        # Close database connection before deleting file
+        database_engine.dispose()
+
+        dataset_path.unlink(missing_ok=True)
+
         raise HTTPException(
             status_code=500,
             detail="Could not store the uploaded dataset.",
         ) from None
+
     finally:
         database_engine.dispose()
 
+    # IMPORTANT: Return successful upload response
     return {
         "dataset_id": dataset_id,
         "rows_loaded": len(df),
         "columns": df.columns.tolist(),
         "message": "Dataset uploaded successfully.",
     }
+
 
 
 @app.get("/")
