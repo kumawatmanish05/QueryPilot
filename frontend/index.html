@@ -4,119 +4,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QueryPilot | Analytics Workspace</title>
-    <link rel="stylesheet" href="style.css">
+    <title>QueryPilot | AI Data Analytics</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1c2b4a;
+        }
+
+        header {
+            background: #192955;
+            color: white;
+            padding: 18px 6%;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        header span { color: #91a9e8; }
+
+        main {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        h1 { margin-bottom: 8px; }
+        .subtitle { color: #71809c; margin-bottom: 25px; }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #dce4f2;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 18px;
+        }
+
+        h2 { font-size: 18px; margin-top: 0; }
+
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #dce4f2;
+            border-radius: 8px;
+            resize: vertical;
+            font: inherit;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 12px;
+            border: 0;
+            border-radius: 8px;
+            background: #192955;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .status {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        pre {
+            background: #192955;
+            color: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            min-height: 60px;
+            font-size: 13px;
+        }
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 11px;
+            text-align: left;
+            border-bottom: 1px solid #e5eaf2;
+        }
+
+        th { background: #f1f4fa; }
+
+        @media (max-width: 760px) {
+            .layout { grid-template-columns: 1fr; }
+            main { margin-top: 22px; }
+        }
+    </style>
 </head>
+
 <body>
+<header>QueryPilot<span>.</span></header>
 
-    <header class="navbar">
-        <div class="logo">QueryPilot<span>.</span></div>
-        <div class="status">
-            <span class="status-dot"></span>
-            AI Analytics Workspace
-        </div>
-    </header>
+<main>
+    <h1>Explore your data</h1>
+    <p class="subtitle">Upload a CSV and ask questions in plain English.</p>
 
-    <main class="workspace">
-
-        <section class="left-panel">
-
-            <div class="welcome">
-                <h1>Explore your data.</h1>
-                <p>Upload a dataset and ask questions in plain English.</p>
+    <div class="layout">
+        <section>
+            <div class="card">
+                <h2>1. Upload dataset</h2>
+                <input id="fileInput" type="file" accept=".csv">
+                <button id="uploadBtn" type="button">Upload CSV</button>
+                <p id="uploadStatus" class="status">No dataset uploaded.</p>
             </div>
 
-            
-<div class="panel-card upload-card">
-    <h2>01. Your dataset</h2>
-    <p class="description">Upload a CSV file to get started.</p>
+            <div class="card">
+                <h2>2. Ask a question</h2>
+                <textarea id="questionInput"
+                    placeholder="Example: Show total revenue by product category"></textarea>
+                <button id="queryBtn" type="button">Generate insights</button>
+                <p id="queryStatus" class="status"></p>
+            </div>
+        </section>
 
-    <label for="fileInput" class="upload-zone">
-        <span class="upload-icon">↑</span>
-        <strong>Choose a CSV file</strong>
-        <span>Click to browse your files</span>
-        <small>CSV files only · Maximum 5 MB</small>
-    </label>
+        <section>
+            <div class="card">
+                <h2>Generated SQL</h2>
+                <pre id="sqlOutput">SQL will appear here.</pre>
+            </div>
 
-    <input type="file" id="fileInput" accept=".csv" hidden>
-
-    <div id="fileInfo" class="dataset-preview" hidden>
-        <div class="file-icon">CSV</div>
-
-        <div class="file-details">
-            <strong id="fileName">sample_sales.csv</strong>
-            <span id="fileMeta">Waiting for upload...</span>
-        </div>
-
-        <span id="fileStatus" class="file-status">Ready</span>
+            <div class="card">
+                <h2>Query results</h2>
+                <div id="resultsOutput" class="status">
+                    Results will appear here.
+                </div>
+            </div>
+        </section>
     </div>
+</main>
 
-    <button type="button" id="uploadBtn">
-        Upload dataset
-    </button>
+<script>
+    // For local testing. Replace with deployed backend URL during deployment.
+    const API_BASE_URL = "http://127.0.0.1:8000";
 
-    <p id="uploadStatus" class="status-message"></p>
-</div>
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const uploadStatus = document.getElementById("uploadStatus");
+    const questionInput = document.getElementById("questionInput");
+    const queryBtn = document.getElementById("queryBtn");
+    const queryStatus = document.getElementById("queryStatus");
+    const sqlOutput = document.getElementById("sqlOutput");
+    const resultsOutput = document.getElementById("resultsOutput");
 
+    let datasetId = sessionStorage.getItem("querypilot_dataset_id");
 
-            <div class="panel-card question-card">
-                <h2>02. Ask a question</h2>
-                <p class="description">
-                    What would you like to know about your data?
-                </p>
+    async function getResponse(response) {
+        const text = await response.text();
+        let data;
 
-                <textarea
-                    id="questionInput"
-                    placeholder="Example: Show total revenue by product..."
-                ></textarea>
+        try {
+            data = text ? JSON.parse(text) : {};
+        } catch {
+            throw new Error("The server returned an invalid response.");
+        }
 
-                <button type="button" id="queryBtn" >
-                    Generate insights →
-                </button>
-            </div>
+        if (!response.ok) {
+            throw new Error(data.detail || `Request failed (${response.status}).`);
+        }
 
-        </section>
+        return data;
+    }
 
-        <section class="right-panel">
+    // Restore uploaded dataset for this browser session.
+    if (datasetId) {
+        uploadStatus.textContent =
+            `Dataset restored: ${sessionStorage.getItem("querypilot_file_name") || datasetId}`;
+    }
 
-            <div class="results-header">
-                <div>
-                    <h2>Analytics results</h2>
-                    <p class="description">
-                        Your generated SQL and query output.
-                    </p>
-                </div>
-            </div>
+    // Upload CSV.
+    uploadBtn.addEventListener("click", async () => {
+        const file = fileInput.files[0];
 
-            <div class="panel-card sql-card">
-                <div class="card-heading">
-                    <h3>Generated SQL</h3>
-                    <span class="tag">SQL</span>
-                </div>
+        if (!file) {
+            uploadStatus.textContent = "Choose a CSV file first.";
+            return;
+        }
 
-                <pre id="sqlOutput">Your SQL query will appear here.</pre>
-            </div>
+        if (!file.name.toLowerCase().endsWith(".csv")) {
+            uploadStatus.textContent = "Please select a CSV file.";
+            return;
+        }
 
-            <div class="panel-card output-card">
-                <div class="card-heading">
-                    <h3>Query results</h3>
-                    <span class="tag">OUTPUT</span>
-                </div>
+        const formData = new FormData();
+        formData.append("file", file);
 
-                <div id="resultsOutput">
-                    <div class="empty-state">
-                        <p>Your results will appear here.</p>
-                        <span>Upload a dataset and ask your first question.</span>
-                    </div>
-                </div>
-            </div>
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = "Uploading...";
+        uploadStatus.textContent = "Uploading dataset...";
 
-        </section>
+        try {
+            const response = await fetch(`${API_BASE_URL}/datasets/upload`, {
+                method: "POST",
+                body: formData
+            });
 
-    </main>
+            const data = await getResponse(response);
 
-    <script src="script.js"></script>
+            if (!data.dataset_id) {
+                throw new Error("Upload response is missing dataset_id.");
+            }
+
+            datasetId = data.dataset_id;
+            sessionStorage.setItem("querypilot_dataset_id", datasetId);
+            sessionStorage.setItem("querypilot_file_name", file.name);
+
+            uploadStatus.textContent =
+                `${data.message || "Upload successful"} — ${data.rows_loaded} rows, ${data.columns?.length ?? "?"} columns.`;
+
+            sqlOutput.textContent = "SQL will appear here.";
+            resultsOutput.textContent = "Dataset ready. Ask a question.";
+
+        } catch (error) {
+            uploadStatus.textContent = error.message;
+        } finally {
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = "Upload CSV";
+        }
+    });
+
+    // Render result rows safely.
+    function renderResults(rows) {
+        resultsOutput.replaceChildren();
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+            resultsOutput.textContent = "No rows returned.";
+            return;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "table-wrap";
+
+        const table = document.createElement("table");
+        const headers = Object.keys(rows[0]);
+
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+
+        headers.forEach(key => {
+            const th = document.createElement("th");
+            th.textContent = key;
+            headerRow.appendChild(th);
+        });
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
+        rows.forEach(row => {
+            const tr = document.createElement("tr");
+
+            headers.forEach(key => {
+                const td = document.createElement("td");
+                const value = row[key];
+                td.textContent = value == null ? "NULL" : String(value);
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        wrapper.appendChild(table);
+        resultsOutput.appendChild(wrapper);
+
+        const count = document.createElement("p");
+        count.className = "status";
+        count.textContent = `${rows.length} row(s) returned.`;
+        resultsOutput.appendChild(count);
+    }
+
+    // Generate SQL and execute query.
+    queryBtn.addEventListener("click", async () => {
+        const question = questionInput.value.trim();
+
+        if (!datasetId) {
+            queryStatus.textContent = "Upload a dataset first.";
+            return;
+        }
+
+        if (!question) {
+            queryStatus.textContent = "Enter a question first.";
+            return;
+        }
+
+        queryBtn.disabled = true;
+        queryBtn.textContent = "Generating...";
+        queryStatus.textContent = "Processing your question...";
+        sqlOutput.textContent = "Generating SQL...";
+        resultsOutput.textContent = "Running query...";
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/query`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    question: question,
+                    dataset_id: datasetId
+                })
+            });
+
+            const data = await getResponse(response);
+
+            sqlOutput.textContent = data.sql || "No SQL returned.";
+            renderResults(data.rows);
+            queryStatus.textContent = `Completed. ${data.row_count ?? data.rows?.length ?? 0} row(s).`;
+
+        } catch (error) {
+            sqlOutput.textContent = "Query failed.";
+            resultsOutput.textContent = error.message;
+            queryStatus.textContent = "Please check the backend and try again.";
+        } finally {
+            queryBtn.disabled = false;
+            queryBtn.textContent = "Generate insights";
+        }
+    });
+</script>
 </body>
 </html>
-
-

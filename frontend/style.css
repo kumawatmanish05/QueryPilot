@@ -1,22 +1,19 @@
 
-/* =====================================
-   QueryPilot — Clean Navy SaaS Theme
-===================================== */
+/* =================================
+   1. GLOBAL STYLES
+================================= */
 
 :root {
-    --background: #edf1f8;
+    --navy: #192955;
+    --navy-light: #233b73;
+    --background: #edf1f9;
     --surface: #ffffff;
-    --navy: #172554;
-    --navy-light: #263b75;
-    --text: #172033;
-    --muted: #778195;
-    --border: #dce3ef;
-    --soft-navy: #e9eef8;
+    --surface-light: #f3f6fb;
+    --border: #dce4f2;
+    --text: #172b52;
+    --muted: #71809c;
     --success: #16845b;
-    --danger: #c43d4b;
 }
-
-/* Reset */
 
 * {
     margin: 0;
@@ -25,703 +22,445 @@
 }
 
 body {
-    font-family: Inter, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     background: var(--background);
     color: var(--text);
     min-height: 100vh;
 }
 
-/* =====================================
-   Navbar
-===================================== */
+button,
+textarea,
+input {
+    font: inherit;
+}
 
-.navbar {
-    height: 65px;
-    padding: 0 5%;
+button {
+    cursor: pointer;
+}
+
+
+/* =================================
+   2. HEADER
+================================= */
+
+.top-header {
+    height: 57px;
+    width: 100%;
     background: var(--navy);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    padding: 0 3.5%;
 }
 
-.logo {
-    font-size: 23px;
-    font-weight: 750;
-    letter-spacing: -1px;
-    color: #ffffff;
+.brand {
+    color: white;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
 }
 
-.logo span {
-    color: #aab9dc;
+.brand span {
+    color: #8fa9e8;
 }
 
-.status {
-    font-size: 12px;
-    color: #d5dced;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
 
-.status-dot {
-    width: 8px;
-    height: 8px;
-    background: #4ade80;
-    border-radius: 50%;
-}
+/* =================================
+   3. MAIN DASHBOARD
+================================= */
 
-/* =====================================
-   Main Workspace
-===================================== */
-
-.workspace {
-    width: 94%;
-    max-width: 1500px;
-    height: calc(100vh - 65px);
-    min-height: 550px;
-    margin: auto;
-    padding: 25px 0;
-
+.dashboard {
+    width: 100%;
+    padding: 22px 20px;
     display: grid;
-    grid-template-columns: 0.85fr 1.4fr;
-    gap: 24px;
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
 }
 
-.left-panel,
-.right-panel {
+.left-column,
+.right-column {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 17px;
+    gap: 13px;
 }
 
-/* =====================================
-   Welcome Section
-===================================== */
 
-.welcome {
-    padding: 5px 2px 8px;
+/* =================================
+   4. PAGE HEADINGS
+================================= */
+
+.page-heading {
+    padding: 0 2px 5px;
 }
 
-.welcome h1 {
-    font-size: 29px;
-    letter-spacing: -1px;
-    margin-bottom: 8px;
-    color: var(--navy);
+.page-heading h1 {
+    font-size: 28px;
+    font-weight: 750;
+    letter-spacing: -0.8px;
+    margin-bottom: 9px;
 }
 
-.welcome p,
-.description {
+.page-heading p {
     color: var(--muted);
-    font-size: 13px;
-    line-height: 1.6;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
-/* =====================================
-   Cards
-===================================== */
 
-.panel-card {
+/* =================================
+   5. CARDS
+================================= */
+
+.card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 21px;
-    min-width: 0;
-
-    box-shadow: 0 3px 12px rgba(23, 37, 84, 0.04);
+    border-radius: 17px;
+    padding: 20px 17px;
+    box-shadow: 0 3px 10px rgba(25, 41, 85, 0.025);
 }
 
-.panel-card h2 {
-    font-size: 15px;
-    margin-bottom: 5px;
-    color: var(--navy);
+.card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 11px;
 }
 
-.panel-card h3 {
-    font-size: 14px;
-    color: var(--navy);
-}
-
-/* Upload card */
-
-.left-panel .panel-card:first-of-type {
-    border-top: 3px solid var(--navy);
-}
-
-/* Question card */
-
-.question-card {
-    border-top: 3px solid var(--navy);
-}
-
-/* =====================================
-   File Upload
-===================================== */
-
-input[type="file"] {
-    display: block;
-    width: 100%;
-    margin: 16px 0;
-    padding: 11px;
-
-    border: 1px dashed #aebbd3;
-    border-radius: 7px;
-
-    background: var(--soft-navy);
-    font-size: 12px;
+.section-description {
     color: var(--muted);
-}
-
-/* =====================================
-   Question Input
-===================================== */
-
-textarea {
-    display: block;
-    width: 100%;
-    height: 110px;
-    margin: 14px 0;
-    padding: 13px;
-
-    border: 1px solid var(--border);
-    border-radius: 7px;
-
-    background: #fafbfe;
-    color: var(--text);
-
-    font-family: inherit;
-    font-size: 13px;
-    line-height: 1.6;
-
-    resize: vertical;
-    transition: 0.2s;
-}
-
-textarea::placeholder {
-    color: #9aa3b2;
-}
-
-textarea:focus {
-    outline: none;
-    border-color: var(--navy);
-    box-shadow: 0 0 0 3px rgba(23, 37, 84, 0.08);
-}
-
-/* =====================================
-   Buttons
-===================================== */
-
-.primary-btn {
-    width: 100%;
-    padding: 12px;
-
-    border: none;
-    border-radius: 7px;
-
-    background: var(--navy);
-    color: #ffffff;
-
-    font-size: 13px;
-    font-weight: 600;
-
-    cursor: pointer;
-    transition: background 0.2s, transform 0.2s;
-}
-
-.primary-btn:hover {
-    background: var(--navy-light);
-    transform: translateY(-1px);
-}
-
-.primary-btn:active {
-    transform: translateY(0);
-}
-
-.primary-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* =====================================
-   Upload Status
-===================================== */
-
-.status-message {
-    margin-top: 10px;
-    font-size: 12px;
-    color: var(--success);
-}
-
-/* =====================================
-   Results Header
-===================================== */
-
-.results-header {
-    padding: 5px 2px 8px;
-}
-
-.results-header h2 {
-    font-size: 21px;
-    margin-bottom: 5px;
-    color: var(--navy);
-}
-
-/* =====================================
-   SQL Section
-===================================== */
-
-.sql-card {
-    flex: 0 0 auto;
-    background: #f4f6fb;
-    border-color: #dce3ef;
-}
-
-pre {
-    background: var(--navy);
-    border: 1px solid #263b75;
-    border-radius: 7px;
-
-    padding: 16px;
-    min-height: 90px;
-    max-height: 155px;
-
-    overflow: auto;
-
-    color: #e2e8f0;
-    font-family: Consolas, monospace;
-    font-size: 12px;
-    line-height: 1.7;
-
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-}
-
-/* =====================================
-   Section Labels
-===================================== */
-
-.card-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    font-size: 16px;
+    line-height: 1.5;
     margin-bottom: 14px;
 }
 
-.tag {
-    padding: 5px 9px;
-    background: var(--soft-navy);
-    color: var(--navy);
-    border-radius: 5px;
-    font-size: 10px;
-    font-weight: 700;
+
+/* =================================
+   6. DATASET UPLOAD
+================================= */
+
+.upload-card {
+    min-height: 415px;
 }
 
-/* =====================================
-   Query Results
-===================================== */
-
-.output-card {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    background: var(--surface);
-}
-
-#resultsOutput {
-    color: var(--muted);
-    font-size: 13px;
-    overflow-x: auto;
-}
-
-.empty-state {
-    min-height: 180px;
-
+.upload-area {
+    width: 100%;
+    min-height: 139px;
+    border: 1px dashed #a9bce0;
+    border-radius: 14px;
+    background: var(--surface-light);
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-
-    text-align: center;
-    gap: 8px;
-
-    color: var(--muted);
-    background: #f7f9fc;
-
-    border: 1px dashed #d9e0ec;
-    border-radius: 9px;
-}
-
-.empty-state span {
-    font-size: 12px;
-}
-
-/* =====================================
-   Responsive Design
-===================================== */
-
-@media (max-width: 800px) {
-
-    .workspace {
-        height: auto;
-        min-height: 0;
-        grid-template-columns: 1fr;
-        padding: 22px 0;
-    }
-
-    .output-card {
-        min-height: 250px;
-    }
-}
-
-@media (max-height: 700px) and (min-width: 801px) {
-
-    .workspace {
-        padding: 15px 0;
-        gap: 12px;
-    }
-
-    .left-panel,
-    .right-panel {
-        gap: 10px;
-    }
-
-    .panel-card {
-        padding: 15px;
-    }
-
-    textarea {
-        height: 75px;
-    }
-}
-
-@media (max-width: 480px) {
-
-    .navbar {
-        padding: 0 18px;
-    }
-
-    .logo {
-        font-size: 20px;
-    }
-
-    .status {
-        font-size: 10px;
-    }
-
-    .welcome h1 {
-        font-size: 25px;
-    }
-
-    .panel-card {
-        padding: 17px;
-    }
-}
-
-.file-info {
-    margin: 12px 0;
-    padding: 11px 13px;
-    border-radius: 7px;
-    background: #e9eef8;
-    color: #172554;
-    font-size: 12px;
-    overflow-wrap: anywhere;
-}
-
-
-/* Dataset upload zone */
-
-.upload-zone {
-    min-height: 145px;
-    margin: 18px 0;
-    padding: 20px;
-    border: 1px dashed #aebbd3;
-    border-radius: 10px;
-    background: #f5f7fb;
-
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 7px;
-
-    cursor: pointer;
-    transition: 0.2s;
+    padding: 12px;
+    transition: border-color 0.2s, background 0.2s;
 }
 
-.upload-zone:hover {
-    background: #e9eef8;
-    border-color: #172554;
+.upload-area:hover {
+    border-color: var(--navy-light);
+    background: #edf2fc;
 }
 
 .upload-icon {
-    width: 35px;
-    height: 35px;
-    border-radius: 9px;
-    background: #172554;
+    width: 36px;
+    height: 36px;
+    background: var(--navy);
     color: white;
+    border-radius: 12px;
     display: grid;
     place-items: center;
-    font-size: 22px;
+    font-size: 24px;
+    font-weight: 700;
 }
 
-.upload-zone strong {
-    font-size: 13px;
-    color: #172554;
+.file-label {
+    color: var(--navy);
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
-.upload-zone span:not(.upload-icon) {
+.upload-area p {
+    color: var(--muted);
+    font-size: 15px;
+}
+
+.upload-area small {
+    color: #8795ae;
     font-size: 12px;
-    color: #778195;
 }
 
-.upload-zone small {
-    font-size: 10px;
-    color: #9aa3b2;
-}
 
-/* Uploaded dataset preview */
+/* =================================
+   7. SELECTED FILE INFORMATION
+================================= */
 
-.dataset-preview {
+.file-info {
+    min-height: 73px;
+    margin-top: 12px;
+    padding: 11px;
+    background: #f0f3fa;
+    border: 1px solid var(--border);
+    border-radius: 13px;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 13px;
-    margin: 14px 0;
-    background: #f1f4fa;
-    border: 1px solid #dce3ef;
-    border-radius: 9px;
 }
 
-.dataset-preview[hidden] {
+.file-info[hidden] {
     display: none;
 }
 
 .file-icon {
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
-    border-radius: 8px;
-    background: #172554;
+    width: 49px;
+    height: 49px;
+    background: var(--navy);
     color: white;
+    border-radius: 12px;
     display: grid;
     place-items: center;
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 700;
+    flex-shrink: 0;
 }
 
 .file-details {
     min-width: 0;
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
 }
 
 .file-details strong {
-    font-size: 12px;
-    color: #172554;
+    display: block;
+    font-size: 15px;
     overflow-wrap: anywhere;
 }
 
-.file-details span {
-    font-size: 11px;
-    color: #778195;
+.file-details p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 7px;
 }
 
-.file-status {
-    font-size: 10px;
-    font-weight: 700;
-    color: #16845b;
-    background: #e2f4eb;
-    padding: 5px 8px;
+#fileStatus {
+    color: var(--success);
+    background: #e0f4eb;
     border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
 }
 
-/* =====================================
-   Compact Desktop Workspace
-===================================== */
 
-@media (min-width: 801px) {
+/* =================================
+   8. BUTTONS
+================================= */
 
-    .workspace {
-        height: calc(100vh - 65px);
-        min-height: 0;
-        padding: 16px 0;
-        gap: 18px;
-        overflow: hidden;
-    }
-
-    .left-panel,
-    .right-panel {
-        gap: 12px;
-        min-height: 0;
-    }
-
-    .welcome {
-        padding: 0 2px 3px;
-    }
-
-    .welcome h1 {
-        font-size: 25px;
-        margin-bottom: 5px;
-    }
-
-    .panel-card {
-        padding: 15px;
-    }
-
-    .upload-zone {
-        min-height: 105px;
-        margin: 12px 0;
-        padding: 12px;
-    }
-
-    .upload-icon {
-        width: 29px;
-        height: 29px;
-        font-size: 18px;
-    }
-
-    .dataset-preview {
-        margin: 9px 0;
-        padding: 9px;
-    }
-
-    textarea {
-        height: 75px;
-        margin: 10px 0;
-    }
-
-    .results-header {
-        padding: 0 2px 3px;
-    }
-
-    .sql-card {
-        padding: 14px;
-    }
-
-    pre {
-        min-height: 65px;
-        max-height: 115px;
-        padding: 12px;
-    }
-
-    .output-card {
-        min-height: 0;
-        overflow: auto;
-    }
+.primary-button {
+    width: 100%;
+    min-height: 54px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 11px;
+    background: var(--navy);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    transition: background 0.2s, transform 0.2s;
 }
 
-input[type="file"][hidden] {
-    display: none !important;
+.primary-button:hover {
+    background: var(--navy-light);
 }
 
-@media (min-width: 801px) {
-
-    .workspace {
-        padding: 12px 0;
-        gap: 16px;
-    }
-
-    .left-panel,
-    .right-panel {
-        gap: 9px;
-    }
-
-    .welcome h1 {
-        font-size: 24px;
-        margin-bottom: 4px;
-    }
-
-    .welcome p {
-        font-size: 12px;
-    }
-
-    .panel-card {
-        padding: 13px;
-    }
-
-    .upload-zone {
-        min-height: 78px;
-        margin: 9px 0;
-        padding: 8px;
-        gap: 4px;
-    }
-
-    .upload-icon {
-        width: 25px;
-        height: 25px;
-        font-size: 16px;
-    }
-
-    .dataset-preview {
-        margin: 8px 0;
-        padding: 8px;
-    }
-
-    .file-icon {
-        width: 35px;
-        height: 35px;
-    }
-
-    textarea {
-        height: 65px;
-        margin: 8px 0;
-    }
-
-    .question-card {
-        padding: 13px;
-    }
+.primary-button:active {
+    transform: scale(0.99);
 }
-/* Query Results Table */
+
+.primary-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =================================
+   9. STATUS MESSAGES
+================================= */
+
+.status-message {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+
+/* =================================
+   10. QUESTION INPUT
+================================= */
+
+.question-card {
+    border-top: 4px solid var(--navy);
+    min-height: 265px;
+}
+
+.question-card textarea {
+    display: block;
+    width: 100%;
+    min-height: 90px;
+    padding: 17px;
+    resize: vertical;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: #fafbfe;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    outline: none;
+}
+
+.question-card textarea::placeholder {
+    color: #96a2b8;
+}
+
+.question-card textarea:focus {
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(35, 59, 115, 0.08);
+}
+
+
+/* =================================
+   11. GENERATED SQL
+================================= */
+
+.sql-card {
+    min-height: 177px;
+    background: #f5f7fc;
+}
+
+.sql-card h2,
+.results-card h2 {
+    font-size: 18px;
+    margin-bottom: 21px;
+}
+
+.sql-card pre {
+    width: 100%;
+    min-height: 89px;
+    padding: 20px 17px;
+    border-radius: 9px;
+    background: var(--navy);
+    color: #ffffff;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    overflow-x: auto;
+}
+
+
+/* =================================
+   12. QUERY RESULTS
+================================= */
+
+.results-card {
+    min-height: 500px;
+}
+
+#resultsOutput {
+    width: 100%;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: auto;
+}
+
 .results-wrapper {
     width: 100%;
     overflow-x: auto;
-    margin-top: 16px;
-    border: 1px solid #dce3ed;
-    border-radius: 10px;
-    background: #ffffff;
+    margin-top: 12px;
 }
 
 .results-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
-    text-align: left;
-    min-width: 450px;
-}
-
-.results-table thead {
-    background: #eef2f8;
+    color: var(--text);
 }
 
 .results-table th {
-    padding: 14px 16px;
-    color: #263653;
-    font-weight: 600;
-    border-bottom: 1px solid #dce3ed;
-    white-space: nowrap;
+    background: #f0f3fa;
+    color: var(--navy);
+    font-weight: 700;
+    text-align: left;
+    padding: 13px;
+    border-bottom: 1px solid var(--border);
 }
 
 .results-table td {
-    padding: 13px 16px;
-    color: #46546a;
-    border-bottom: 1px solid #edf0f5;
+    padding: 12px 13px;
+    border-bottom: 1px solid #e9edf5;
 }
 
-.results-table tbody tr:hover {
-    background: #f6f8fc;
+.results-table tr:hover td {
+    background: #f8faff;
 }
 
-.results-table tbody tr:last-child td {
-    border-bottom: none;
+
+/* =================================
+   13. RESPONSIVE DESIGN
+================================= */
+
+@media (max-width: 900px) {
+
+    .dashboard {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .upload-card {
+        min-height: auto;
+    }
+
+    .results-card {
+        min-height: 300px;
+    }
+
 }
 
-.results-table td.numeric {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
+@media (max-width: 520px) {
+
+    .top-header {
+        height: 55px;
+        padding: 0 18px;
+    }
+
+    .brand {
+        font-size: 25px;
+    }
+
+    .dashboard {
+        padding: 18px 12px;
+    }
+
+    .page-heading h1 {
+        font-size: 24px;
+    }
+
+    .page-heading p {
+        font-size: 14px;
+    }
+
+    .card {
+        padding: 17px 13px;
+    }
+
+    .card h2 {
+        font-size: 18px;
+    }
+
 }
+
 
 

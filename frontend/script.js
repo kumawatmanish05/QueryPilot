@@ -3,112 +3,78 @@
 // QueryPilot - Frontend JavaScript
 // ============================================
 
+console.log("QueryPilot page loaded:", new Date().toISOString());
+
+
+// TEMPORARY: Detect and prevent unexpected form submissions.
+document.addEventListener("submit", (event) => {
+    console.error("Unexpected form submission detected:", event.target);
+    event.preventDefault();
+    event.stopPropagation();
+}, true);
+
+// TEMPORARY: Detect page navigation/reload.
+window.addEventListener("beforeunload", () => {
+    console.warn("QueryPilot is about to reload or navigate.");
+});
+
 const API_BASE_URL = "http://127.0.0.1:8000";
 
-console.log("QueryPilot script loaded successfully.");
-
-
 // ============================================
-// DOM Elements
+// 1. DOM ELEMENTS
 // ============================================
 
 const fileInput = document.getElementById("fileInput");
 const uploadBtn = document.getElementById("uploadBtn");
-const uploadStatus = document.getElementById("uploadStatus");
 
 const fileInfo = document.getElementById("fileInfo");
 const fileName = document.getElementById("fileName");
 const fileMeta = document.getElementById("fileMeta");
 const fileStatus = document.getElementById("fileStatus");
 
-const queryBtn = document.getElementById("queryBtn");
+const uploadStatus = document.getElementById("uploadStatus");
+
 const questionInput = document.getElementById("questionInput");
+const queryBtn = document.getElementById("queryBtn");
 
 const sqlOutput = document.getElementById("sqlOutput");
 const resultsOutput = document.getElementById("resultsOutput");
 
 
 // ============================================
-// Application State
+// 2. APPLICATION STATE
 // ============================================
 
-let currentDatasetId = sessionStorage.getItem(
-    "querypilot_dataset_id"
-);
-
-const savedFileName = sessionStorage.getItem(
-    "querypilot_file_name"
-);
-
-const savedRowCount = sessionStorage.getItem(
-    "querypilot_row_count"
-);
+let selectedFile = null;
+let currentDatasetId = sessionStorage.getItem("querypilot_dataset_id");
 
 
 // ============================================
-// Restore Previous Dataset
-// ============================================
-
-if (currentDatasetId && savedFileName) {
-
-    fileInfo.hidden = false;
-
-    fileName.textContent = savedFileName;
-
-    fileMeta.textContent =
-        `${savedRowCount || 0} rows loaded`;
-
-    fileStatus.textContent = "Uploaded";
-
-    uploadStatus.textContent =
-        "Dataset ready for analysis.";
-
-    resultsOutput.textContent =
-        "Ask a question to explore your dataset.";
-
-    console.log("Restored dataset:", currentDatasetId);
-}
-
-
-// ============================================
-// API Response Handler
+// 3. API RESPONSE HANDLER
 // ============================================
 
 async function readApiResponse(response) {
-
     const responseText = await response.text();
-
-    console.log("API Status:", response.status);
-    console.log("Raw API Response:", responseText);
 
     let data;
 
     try {
-
-        data = JSON.parse(responseText);
-
+        data = responseText ? JSON.parse(responseText) : {};
     } catch {
-
-        throw new Error(
-            `Invalid server response (${response.status}).`
-        );
-
+        throw new Error("The server returned an invalid response.");
     }
 
     if (!response.ok) {
+        const message =
+            data.detail ||
+            data.message ||
+            `Request failed with status ${response.status}.`;
 
-        throw new Error(
-            data?.detail || "Request failed."
-        );
-
+        throw new Error(message);
     }
 
-    if (!data || typeof data !== "object") {
-
-        throw new Error(
-            "Backend returned an empty or invalid response."
-        );
-
+    if (data === null || typeof data !== "object") {
+        throw new Error("The server returned an empty response.");
     }
 
     return data;
@@ -116,136 +82,110 @@ async function readApiResponse(response) {
 
 
 // ============================================
-// Clear Saved Dataset
+// 4. RESTORE PREVIOUS DATASET
 // ============================================
 
-function clearSavedDataset() {
+function restoreDataset() {
+    const savedDatasetId = sessionStorage.getItem("querypilot_dataset_id");
+    const savedFileName = sessionStorage.getItem("querypilot_file_name");
+    const savedRows = sessionStorage.getItem("querypilot_rows");
 
-    currentDatasetId = null;
+    if (!savedDatasetId) {
+        currentDatasetId = null;
+        fileInfo.hidden = true;
+        return;
+    }
 
-    sessionStorage.removeItem("querypilot_dataset_id");
-    sessionStorage.removeItem("querypilot_file_name");
-    sessionStorage.removeItem("querypilot_row_count");
+    currentDatasetId = savedDatasetId;
 
+    fileInfo.hidden = false;
+
+    fileName.textContent = savedFileName || "Uploaded dataset";
+    fileMeta.textContent = savedRows
+        ? `${savedRows} rows uploaded`
+        : "Dataset uploaded successfully";
+
+    fileStatus.textContent = "Uploaded";
+
+    uploadStatus.textContent = "Your previous dataset is ready.";
+    resultsOutput.textContent = "Ask a question to explore your data.";
 }
 
 
 // ============================================
-// File Selection
+// 5. FILE SELECTION
 // ============================================
 
 fileInput.addEventListener("change", () => {
-
     const file = fileInput.files[0];
 
-    if (!file) return;
-
-    console.log("Selected file:", file.name);
-
-
-    // Validate CSV extension
-
-    if (!file.name.toLowerCase().endsWith(".csv")) {
-
-        uploadStatus.textContent =
-            "Please select a CSV file.";
-
-        fileInput.value = "";
-
+    if (!file) {
         return;
     }
 
+    selectedFile = file;
 
-    // Validate file size (5 MB)
+    // Clear the previous dataset selection.
+    currentDatasetId = null;
 
-    if (file.size > 5 * 1024 * 1024) {
+    sessionStorage.removeItem("querypilot_dataset_id");
+    sessionStorage.removeItem("querypilot_file_name");
+    sessionStorage.removeItem("querypilot_rows");
 
-        uploadStatus.textContent =
-            "File size exceeds the 5 MB limit.";
+    // Reset previous results.
+    sqlOutput.textContent = "Your SQL query will appear here.";
+    resultsOutput.textContent = "Upload your dataset to get started.";
 
-        fileInput.value = "";
-
-        return;
-    }
-
-
-    // New file requires a new upload
-
-    clearSavedDataset();
-
-
-    // Keep selected file visible
+    uploadStatus.textContent = "";
 
     fileInfo.hidden = false;
 
     fileName.textContent = file.name;
-
-    fileMeta.textContent = "Ready to upload";
+    fileMeta.textContent =
+        `${(file.size / (1024 * 1024)).toFixed(2)} MB · Ready to upload`;
 
     fileStatus.textContent = "Selected";
 
-    uploadStatus.textContent = "";
+    // Basic file validation.
+    const isCSV = file.name.toLowerCase().endsWith(".csv");
+    const maxSize = 5 * 1024 * 1024;
 
+    if (!isCSV) {
+        uploadStatus.textContent = "Please select a CSV file.";
+        selectedFile = null;
+        return;
+    }
 
-    // Reset previous results
+    if (file.size > maxSize) {
+        uploadStatus.textContent = "File size must not exceed 5 MB.";
+        selectedFile = null;
+        return;
+    }
 
-    resultsOutput.textContent =
-        "Upload your selected dataset to start analyzing.";
-
-    sqlOutput.textContent =
-        "Your SQL query will appear here.";
-
+    uploadStatus.textContent = "File selected successfully.";
 });
 
 
 // ============================================
-// CSV Upload
+// 6. UPLOAD DATASET
 // ============================================
 
 uploadBtn.addEventListener("click", async () => {
-
-    console.log("Upload button clicked.");
-
-    const file = fileInput.files[0];
-
-
-    // Check file selection
-
-    if (!file) {
-
-        uploadStatus.textContent =
-            "Please select a CSV file first.";
-
+    event.preventDefault();
+    if (!selectedFile) {
+        uploadStatus.textContent = "Please select a CSV file first.";
         return;
     }
 
-
-    // Prepare upload data
-
     const formData = new FormData();
+    formData.append("file", selectedFile);
 
-    formData.append("file", file);
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = "Uploading...";
 
+    uploadStatus.textContent = "Uploading your dataset...";
 
     try {
-
-        uploadBtn.disabled = true;
-
-        uploadBtn.textContent = "Uploading...";
-
-        fileInfo.hidden = false;
-
-        fileStatus.textContent = "Uploading";
-
-        fileMeta.textContent = "Processing dataset...";
-
-        uploadStatus.textContent =
-            "Uploading your dataset...";
-
-
-        console.log("Sending upload request...");
-
-
         const response = await fetch(
             `${API_BASE_URL}/datasets/upload`,
             {
@@ -254,175 +194,168 @@ uploadBtn.addEventListener("click", async () => {
             }
         );
 
-
         const data = await readApiResponse(response);
 
-        console.log("Upload response:", data);
-
-
-        // Validate backend response
-
         if (!data.dataset_id) {
-
-            throw new Error(
-                "Upload response does not contain a dataset ID."
-            );
-
+            throw new Error("Upload response did not contain a dataset ID.");
         }
 
-
-        // Save dataset ID
-
+        // Save dataset information.
         currentDatasetId = data.dataset_id;
 
         sessionStorage.setItem(
             "querypilot_dataset_id",
-            currentDatasetId
+            data.dataset_id
         );
 
         sessionStorage.setItem(
             "querypilot_file_name",
-            file.name
+            selectedFile.name
         );
 
         sessionStorage.setItem(
-            "querypilot_row_count",
-            String(data.rows_loaded)
+            "querypilot_rows",
+            data.rows_loaded ?? ""
         );
 
-
-        // Update dataset preview
-
+        // Update dataset information.
         fileInfo.hidden = false;
 
-        fileName.textContent = file.name;
+        fileName.textContent = selectedFile.name;
 
         fileMeta.textContent =
-            `${data.rows_loaded} rows loaded`;
+            `${data.rows_loaded ?? "?"} rows · ${data.columns?.length ?? "?"} columns`;
 
         fileStatus.textContent = "Uploaded";
 
         uploadStatus.textContent =
-            "Dataset ready for analysis.";
+            data.message || "Dataset uploaded successfully.";
 
-
-        // Reset SQL and results
+        resultsOutput.textContent =
+            "Dataset ready! Ask a question to explore your data.";
 
         sqlOutput.textContent =
             "Your SQL query will appear here.";
 
-        resultsOutput.textContent =
-            "Ask a question to explore your dataset.";
-
-
-        console.log(
-            "Dataset uploaded successfully:",
-            currentDatasetId
-        );
-
     } catch (error) {
+        console.error("Dataset upload error:", error);
 
-        console.error("Upload failed:", error);
-
-
-        // Do not remove the selected file preview
-
-        currentDatasetId = null;
-
-        fileInfo.hidden = false;
-
-        fileStatus.textContent = "Failed";
-
-        fileMeta.textContent =
-            "Selected file — upload unsuccessful";
-
-        uploadStatus.textContent =
-            error.message;
-
-
-        // Prevent queries against an unsuccessful upload
-
-        console.warn(
-            "Dataset was not uploaded successfully."
-        );
+        uploadStatus.textContent = error.message;
 
     } finally {
-
         uploadBtn.disabled = false;
-
         uploadBtn.textContent = "Upload dataset";
-
     }
-
 });
 
 
 // ============================================
-// Generate SQL and Execute Query
+// 7. DISPLAY QUERY RESULTS
+// ============================================
+
+function displayResults(rows) {
+    resultsOutput.innerHTML = "";
+
+    if (!Array.isArray(rows)) {
+        resultsOutput.textContent =
+            "The server did not return results in the expected format.";
+        return;
+    }
+
+    if (rows.length === 0) {
+        resultsOutput.textContent = "No results found.";
+        return;
+    }
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "results-wrapper";
+
+    const table = document.createElement("table");
+    table.className = "results-table";
+
+    const headers = Object.keys(rows[0]);
+
+    // Table header.
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+
+    headers.forEach((header) => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Table body.
+    const tbody = document.createElement("tbody");
+
+    rows.forEach((row) => {
+        const tr = document.createElement("tr");
+
+        headers.forEach((header) => {
+            const td = document.createElement("td");
+
+            const value = row[header];
+
+            td.textContent =
+                value === null || value === undefined
+                    ? "NULL"
+                    : String(value);
+
+            tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    wrapper.appendChild(table);
+
+    resultsOutput.appendChild(wrapper);
+
+    const count = document.createElement("p");
+    count.textContent = `${rows.length} row(s) returned.`;
+    count.style.marginTop = "12px";
+
+    resultsOutput.appendChild(count);
+}
+
+
+// ============================================
+// 8. GENERATE SQL AND QUERY RESULTS
 // ============================================
 
 queryBtn.addEventListener("click", async () => {
-
-    console.log("Generate insights button clicked.");
-
     const question = questionInput.value.trim();
 
-
-    // Check uploaded dataset
-
     if (!currentDatasetId) {
-
         resultsOutput.textContent =
             "Please upload a dataset first.";
-
-        console.warn("No dataset ID available.");
-
         return;
     }
-
-
-    // Check question
 
     if (!question) {
-
         resultsOutput.textContent =
-            "Please enter a question.";
-
+            "Please enter a question about your data.";
         return;
     }
 
+    queryBtn.disabled = true;
+    queryBtn.textContent = "Generating insights...";
+
+    sqlOutput.textContent = "Generating SQL...";
+    resultsOutput.textContent = "Analyzing your data...";
 
     try {
-
-        queryBtn.disabled = true;
-
-        queryBtn.textContent =
-            "Generating insights...";
-
-        sqlOutput.textContent =
-            "Generating SQL...";
-
-        resultsOutput.textContent =
-            "Analyzing your dataset...";
-
-
-        console.log("Sending query:", question);
-
-        console.log(
-            "Using dataset:",
-            currentDatasetId
-        );
-
-
         const response = await fetch(
             `${API_BASE_URL}/query`,
             {
                 method: "POST",
-
                 headers: {
                     "Content-Type": "application/json"
                 },
-
                 body: JSON.stringify({
                     question: question,
                     dataset_id: currentDatasetId
@@ -430,162 +363,33 @@ queryBtn.addEventListener("click", async () => {
             }
         );
 
-
         const data = await readApiResponse(response);
 
-        console.log("Query response:", data);
-
-
-        // Display generated SQL
-
+        // Display generated SQL.
         sqlOutput.textContent =
-            data.sql || "No SQL was generated.";
+            data.sql || "No SQL query was returned.";
 
-
-        // Display query results
-
+        // Display query results.
         displayResults(data.rows);
 
-
     } catch (error) {
+        console.error("Query error:", error);
 
-        console.error("Query failed:", error);
+        sqlOutput.textContent = "Query generation failed.";
 
-        sqlOutput.textContent =
-            "Query generation failed.";
-
-        resultsOutput.textContent =
-            error.message;
+        resultsOutput.textContent = error.message;
 
     } finally {
-
         queryBtn.disabled = false;
-
-        queryBtn.textContent =
-            "Generate insights →";
-
+        queryBtn.textContent = "Generate insights →";
     }
-
 });
 
 
 // ============================================
-// Display Query Results
+// 9. INITIALIZE APPLICATION
 // ============================================
 
-function displayResults(rows) {
+restoreDataset();
 
-    resultsOutput.innerHTML = "";
-
-
-    if (!Array.isArray(rows) || rows.length === 0) {
-
-        resultsOutput.textContent =
-            "No results found.";
-
-        return;
-    }
-
-
-    const columns = Object.keys(rows[0]);
-
-
-    // Create wrapper
-
-    const wrapper = document.createElement("div");
-
-    wrapper.className = "results-wrapper";
-
-
-    // Create table
-
-    const table = document.createElement("table");
-
-    table.className = "results-table";
-
-
-    // ========================================
-    // Table Header
-    // ========================================
-
-    const thead = document.createElement("thead");
-
-    const headerRow = document.createElement("tr");
-
-
-    columns.forEach(column => {
-
-        const th = document.createElement("th");
-
-        th.textContent = column.replaceAll("_", " ");
-
-        headerRow.appendChild(th);
-
-    });
-
-
-    thead.appendChild(headerRow);
-
-    table.appendChild(thead);
-
-
-    // ========================================
-    // Table Body
-    // ========================================
-
-    const tbody = document.createElement("tbody");
-
-
-    rows.forEach(row => {
-
-        const tr = document.createElement("tr");
-
-
-        columns.forEach(column => {
-
-            const td = document.createElement("td");
-
-            const value = row[column];
-
-
-            if (typeof value === "number") {
-
-                td.textContent = Number.isInteger(value)
-                    ? value.toLocaleString("en-IN")
-                    : value.toLocaleString("en-IN", {
-                        maximumFractionDigits: 2
-                    });
-
-                td.classList.add("numeric");
-
-            } else {
-
-                td.textContent = value ?? "-";
-
-            }
-
-
-            tr.appendChild(td);
-
-        });
-
-
-        tbody.appendChild(tr);
-
-    });
-
-
-    table.appendChild(tbody);
-
-    wrapper.appendChild(table);
-
-    resultsOutput.appendChild(wrapper);
-
-}
-
-
-// ============================================
-// End of QueryPilot Frontend
-// ============================================
-
-
+console.log("QueryPilot frontend initialized successfully.");
