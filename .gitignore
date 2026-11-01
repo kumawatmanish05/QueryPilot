@@ -1,11 +1,24 @@
-.venv/
+
+# Environment variables
+.env
+.env.*
+
+!.env.example
+
+# Python
 __pycache__/
 *.py[cod]
-.env
-*.log
-logs/
 .pytest_cache/
-.vscode/
+.venv/
+venv/
+
+# Generated databases
 data/*.db
-.env.*
-!.env.exampel
+data/datasets/*.db
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
