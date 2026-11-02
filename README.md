@@ -60,8 +60,9 @@ QueryPilot validates the generated SQL before execution and restricts database o
 
 ## 🎥 Project Demo
 
-[▶ Watch QueryPilot in Action](https://github.com/kumawatmanish05/QueryPilot/blob/main/assets/Screen%20Recording%202026-11-02%20092807.mp4)
+![QueryPilot Demo](assets/demo.gif)
 
+[▶ Watch Full Demo](assets/Screen%20Recording%202026-11-02%20092807.mp4)
 ---
  
 ## Key Features
