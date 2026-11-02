@@ -50,7 +50,20 @@ LIMIT 1;
 QueryPilot validates the generated SQL before execution and restricts database operations to read-only queries.
 
 ---
+## 📸 Application Screenshots
 
+### Dashboard
+![QueryPilot Dashboard](https://raw.githubusercontent.com/kumawatmanish05/QueryPilot/main/assets/Screenshot%202026-11-02%20093405.png)
+
+### Query Results
+![QueryPilot Query Results](https://raw.githubusercontent.com/kumawatmanish05/QueryPilot/main/assets/Screenshot%202026-11-02%20093542.png)
+
+## 🎥 Project Demo
+
+[▶ Watch QueryPilot in Action](https://github.com/kumawatmanish05/QueryPilot/blob/main/assets/Screen%20Recording%202026-11-02%20092807.mp4)
+
+---
+ 
 ## Key Features
 
 - **CSV Dataset Upload:** Upload CSV files and use them as queryable datasets.
